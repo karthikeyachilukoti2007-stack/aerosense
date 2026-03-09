@@ -1,0 +1,9 @@
+How to Run AeroSence 
+
+1) Open Powershell or Cmd and move into downloads   --->(cd Downloads)
+2)After entering into powershell downloads enter into aerosense folder  --->(cd aerosense)
+3)after entering type npm run dev
+4) open that link in webrowser.
+5)To stop running ctrl+c
+
+

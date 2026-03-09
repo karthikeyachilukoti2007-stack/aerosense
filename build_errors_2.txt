@@ -1,0 +1,4 @@
+﻿src/components/ParticleCard.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+error TS2688: Cannot find type definition file for 'node'.
+  The file is in the program because:
+    Entry point of type library 'node' specified in compilerOptions
