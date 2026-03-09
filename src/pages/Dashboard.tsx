@@ -3,7 +3,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { motion } from 'framer-motion';
-import { Search, MapPin, Thermometer, Droplets, Wind, Loader2, Clock } from 'lucide-react';
+import { Search, MapPin, Thermometer, Droplets, Wind, Loader2, Clock, RefreshCw } from 'lucide-react';
 import WindAnimation from '../components/WindAnimation';
 import ParticleCard from '../components/ParticleCard';
 import LoadingScreen from '../components/LoadingScreen';
@@ -133,7 +133,7 @@ function getAQIStatus(aqi: number): AQIStatus {
 }
 
 function getAQIStyles(aqi: number) {
-  if (aqi <= 50) return { color: '#059669', label: 'Good' }; // Emerald-600 logic since we need valid text/bg contrasts
+  if (aqi <= 50) return { color: '#059669', label: 'Good' };
   if (aqi <= 100) return { color: '#ca8a04', label: 'Moderate' };
   if (aqi <= 150) return { color: '#ea580c', label: 'Unhealthy for Sensitive Groups' };
   if (aqi <= 200) return { color: '#dc2626', label: 'Unhealthy' };
@@ -158,13 +158,9 @@ const Dashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [secondsSinceUpdate, setSecondsSinceUpdate] = useState(0);
 
-  // TODO: Replace loadCityData() with real API when keys are available.
-  // See src/services/airQualityService.ts for future real implementation.
   async function loadCityData(cityName: string) {
     setIsLoading(true);
     setError(null);
-
-    // Simulate realistic network delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
@@ -188,7 +184,6 @@ const Dashboard: React.FC = () => {
         ]
       };
 
-      // Generate smooth 12-hour PM2.5 forecast using fixed offsets (no Math.random)
       const offsets = [0, 4, 8, 5, -3, -6, -2, 3, 7, 10, 6, 2];
       const now = new Date();
       const historyData: HistoricalData[] = offsets.map((offset, i) => {
@@ -241,28 +236,28 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-20">
+    <div className="max-w-6xl mx-auto space-y-6 pb-20 px-2 sm:px-0">
       {isLoading && !data && <LoadingScreen />}
 
       {/* Header / Search */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-        <motion.form {...fadeUp} onSubmit={handleSearch} className={`${glass} p-3 flex gap-3 flex-1 w-full max-w-xl`}>
+        <motion.form {...fadeUp} onSubmit={handleSearch} className={`${glass} p-2 sm:p-3 flex flex-col sm:flex-row gap-3 flex-1 w-full max-w-xl`}>
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
               value={inputCity}
               onChange={e => setInputCity(e.target.value)}
               placeholder="Search global city..."
-              className="w-full pl-10 pr-4 py-2 bg-transparent rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all duration-300 text-slate-900 dark:text-white placeholder-slate-400"
+              className="w-full pl-10 pr-4 py-3 sm:py-2 bg-transparent rounded-xl text-sm lg:text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all duration-300 text-slate-900 dark:text-white placeholder-slate-400"
             />
           </div>
           <button
             type="submit"
             disabled={isLoading}
-            className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all duration-300 flex items-center gap-2 disabled:opacity-50 shimmer"
+            className="px-6 py-4 sm:py-2 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl text-sm lg:text-base font-bold text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 shimmer h-12 sm:h-auto"
           >
-            {isLoading ? <Loader2 className="animate-spin" size={16} /> : null}
-            Search
+            {isLoading ? <Loader2 className="animate-spin" size={16} /> : <Search className="sm:hidden" size={18} />}
+            <span className="sm:inline">Search</span>
           </button>
         </motion.form>
       </div>
@@ -276,11 +271,11 @@ const Dashboard: React.FC = () => {
       {data && (
         <>
           {/* AQI Hero */}
-          <motion.div {...fadeUp} transition={{ delay: 0.1 }} className="flex flex-col items-center py-6">
+          <motion.div {...fadeUp} transition={{ delay: 0.1 }} className="flex flex-col items-center py-4 lg:py-6">
             <div className="flex flex-col items-center text-center mb-6">
               <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                 <MapPin size={18} className="text-emerald-500" />
-                <span className="text-xl font-bold">{data.city}</span>
+                <span className="text-xl lg:text-2xl font-black">{data.city}</span>
               </div>
               <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-2">Simulated Data</span>
             </div>
@@ -290,7 +285,7 @@ const Dashboard: React.FC = () => {
                 <motion.div
                   key={i}
                   className="absolute inset-0 rounded-full border-2"
-                  style={{ borderColor: `${aqiStyles.color}40`, margin: `-${(i + 1) * 16}px` }}
+                  style={{ borderColor: `${aqiStyles.color}40`, margin: `-${(i + 1) * 12}px md:-${(i + 1) * 16}px` }}
                   animate={{ scale: [1, 1.1 + i * 0.1, 1], opacity: [0.3, 0, 0.3] }}
                   transition={{ duration: 2.5 + i * 0.5, repeat: Infinity, delay: i * 0.3 }}
                 />
@@ -298,7 +293,7 @@ const Dashboard: React.FC = () => {
               <motion.div
                 animate={{ scale: [1, 1.05, 1] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="w-[200px] h-[200px] rounded-full flex flex-col items-center justify-center text-white relative z-10"
+                className="w-[130px] h-[130px] md:w-[160px] md:h-[160px] lg:w-[200px] lg:h-[200px] rounded-full flex flex-col items-center justify-center text-white relative z-10"
                 style={{
                   background: `radial-gradient(circle at 35% 35%, ${aqiStyles.color}, #0f172a)`,
                   boxShadow: `0 0 60px ${aqiStyles.color}80`,
@@ -308,40 +303,50 @@ const Dashboard: React.FC = () => {
                   key={data.aqi}
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  className="text-7xl font-black drop-shadow-xl"
+                  className="text-4xl md:text-5xl lg:text-7xl font-black drop-shadow-xl"
                 >
                   {data.aqi}
                 </motion.span>
-                <span className="text-xs tracking-[0.25em] opacity-80 mt-1 font-medium">US AQI</span>
+                <span className="text-[10px] md:text-xs tracking-[0.2em] md:tracking-[0.25em] opacity-80 mt-1 font-medium italic">US AQI</span>
               </motion.div>
             </div>
 
-            <div className="mt-8 text-center space-y-2">
+            <div className="mt-8 text-center space-y-3">
               <motion.div
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                className="inline-flex px-5 py-2 rounded-full text-base font-bold shadow-sm"
+                className="inline-flex px-5 py-2 rounded-full text-sm md:text-base font-bold shadow-sm"
                 style={{ backgroundColor: `${aqiStyles.color}20`, color: aqiStyles.color, border: `1px solid ${aqiStyles.color}40` }}
               >
                 {getAQIStatus(data.aqi)}
               </motion.div>
-              <div className="text-[10px] text-slate-400 pt-2 flex items-center justify-center gap-1.5">
-                <Clock size={12} /> Updated {updateLabel}
+
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={() => loadCityData(data.city)}
+                  className="lg:hidden flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 text-xs font-bold border border-emerald-500/20 active:scale-95 transition-all"
+                >
+                  <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+                  Tap to refresh
+                </button>
+                <div className="text-[10px] text-slate-400 flex items-center justify-center gap-1.5 font-medium">
+                  <Clock size={12} /> Updated {updateLabel}
+                </div>
               </div>
             </div>
           </motion.div>
 
           {/* Weather Row */}
-          <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="grid grid-cols-3 gap-3">
+          <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="grid grid-cols-3 gap-2 sm:gap-3">
             {[
               { icon: Thermometer, label: 'Temp', val: data.temperature !== null ? `${data.temperature}°C` : '—', col: 'text-orange-500' },
-              { icon: Droplets, label: 'Humidity', val: data.humidity !== null ? `${data.humidity}%` : '—', col: 'text-blue-500' },
+              { icon: Droplets, label: 'Humid', val: data.humidity !== null ? `${data.humidity}%` : '—', col: 'text-blue-500' },
               { icon: Wind, label: 'Wind', val: data.windSpeed !== null ? `${data.windSpeed}m/s` : '—', col: 'text-teal-400' },
             ].map((s) => (
-              <motion.div key={s.label} whileHover={{ y: -2 }} className={`${glass} p-4 flex flex-col items-center justify-center text-center gap-2`}>
-                <s.icon className={s.col} size={24} />
+              <motion.div key={s.label} whileHover={{ y: -2 }} className={`${glass} p-3 sm:p-4 flex flex-col items-center justify-center text-center gap-1 sm:gap-2`}>
+                <s.icon className={`${s.col} w-5 h-5 sm:w-6 sm:h-6`} />
                 <div>
-                  <div className="text-[10px] text-slate-500 uppercase tracking-widest">{s.label}</div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">{s.val}</div>
+                  <div className="text-[8px] sm:text-[10px] text-slate-500 uppercase tracking-widest font-bold">{s.label}</div>
+                  <div className="text-sm sm:text-base lg:text-lg font-black text-slate-900 dark:text-white mt-0.5">{s.val}</div>
                 </div>
               </motion.div>
             ))}
@@ -349,8 +354,8 @@ const Dashboard: React.FC = () => {
 
           {/* Wind Animation Widget */}
           {data.windSpeed !== null && (
-            <motion.div {...fadeUp} transition={{ delay: 0.25 }} className={`${glass} p-4`}>
-              <div className="text-xs text-slate-500 uppercase tracking-widest mb-2 font-semibold flex items-center gap-2">
+            <motion.div {...fadeUp} transition={{ delay: 0.25 }} className={`${glass} p-4 hidden sm:block`}>
+              <div className="text-xs text-slate-500 uppercase tracking-widest mb-2 font-black flex items-center gap-2">
                 <Wind size={14} className="text-cyan-500" /> Wind Visualization
               </div>
               <WindAnimation windSpeed={data.windSpeed} />
@@ -358,20 +363,20 @@ const Dashboard: React.FC = () => {
           )}
 
           {/* Pollutant Cards */}
-          <motion.div {...fadeUp} transition={{ delay: 0.3 }} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <motion.div {...fadeUp} transition={{ delay: 0.3 }} className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             {data.pollutants.map((p, i) => {
               const styles = getAQIStyles(p.name === 'PM2.5' ? p.value : p.value * 0.8);
               const isUnhealthy = p.status.includes('Unhealthy') || p.status === 'Hazardous';
               return (
-                <motion.div key={p.name} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.05 }} className={`${glass} overflow-hidden flex flex-col`}>
-                  <div className="p-4 flex-1">
+                <motion.div key={p.name} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.05 }} className={`${glass} overflow-hidden flex flex-col h-full`}>
+                  <div className="p-3 sm:p-4 flex-1">
                     <div className="flex justify-between items-start">
-                      <div className="text-xs text-slate-500 font-bold tracking-wider">{p.name}</div>
-                      <div className="text-[9px] px-1.5 py-0.5 rounded font-bold" style={{ backgroundColor: `${styles.color}20`, color: styles.color }}>{p.status}</div>
+                      <div className="text-[10px] sm:text-xs text-slate-500 font-black tracking-wider">{p.name}</div>
+                      <div className="text-[8px] px-1.5 py-0.5 rounded font-black uppercase tracking-tighter" style={{ backgroundColor: `${styles.color}20`, color: styles.color }}>{p.status.split(' ')[0]}</div>
                     </div>
                     <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-slate-900 dark:text-white">{p.value !== null ? p.value : '—'}</span>
-                      <span className="text-[10px] text-slate-400 font-medium">{p.unit}</span>
+                      <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">{p.value !== null ? p.value : '—'}</span>
+                      <span className="text-[9px] sm:text-[11px] text-slate-400 font-bold">{p.unit}</span>
                     </div>
                   </div>
                   {p.value !== null && <ParticleCard color={styles.color} isUnhealthy={isUnhealthy} />}
@@ -382,12 +387,12 @@ const Dashboard: React.FC = () => {
 
           {/* Historical Forecast */}
           {history.length > 0 && (
-            <motion.div {...fadeUp} transition={{ delay: 0.4 }} className={`${glass} p-5`}>
-              <div className="flex items-center gap-4 mb-6 border-b border-slate-200 dark:border-white/10 pb-2">
-                <button className={`pb-2 text-sm font-semibold transition-colors text-emerald-500 border-b-2 border-emerald-500`}>12-Hour PM2.5 Forecast</button>
+            <motion.div {...fadeUp} transition={{ delay: 0.4 }} className={`${glass} p-4 sm:p-5 overflow-hidden`}>
+              <div className="flex items-center gap-4 mb-4 sm:mb-6 border-b border-slate-200 dark:border-white/10 pb-2">
+                <h3 className="pb-2 text-xs sm:text-sm font-black transition-colors text-emerald-500 border-b-2 border-emerald-500 uppercase tracking-widest leading-relaxed">12-Hour PM2.5 Forecast</h3>
               </div>
 
-              <div className="h-[240px] w-full">
+              <div className="h-[200px] lg:h-[300px] w-full mt-2">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={history}>
                     <defs>
@@ -396,10 +401,10 @@ const Dashboard: React.FC = () => {
                         <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" strokeOpacity={0.2} vertical={false} />
-                    <XAxis dataKey="time" stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={11} />
-                    <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={11} />
-                    <Tooltip contentStyle={{ background: '#0f172a', borderColor: '#1e293b', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" strokeOpacity={0.1} vertical={false} />
+                    <XAxis dataKey="time" stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={10} minTickGap={20} />
+                    <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} fontSize={10} />
+                    <Tooltip contentStyle={{ background: '#0f172a', borderColor: '#1e293b', borderRadius: '12px', color: '#fff', fontSize: '10px' }} />
                     <Area type="monotone" dataKey="pm25" stroke="#10b981" fillOpacity={1} fill="url(#colorPm25)" strokeWidth={3} />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -408,14 +413,14 @@ const Dashboard: React.FC = () => {
           )}
 
           {/* Health Suggestions */}
-          <motion.div {...fadeUp} transition={{ delay: 0.5 }} className={`${glass} p-5`}>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 uppercase tracking-widest">Health Precautions</h3>
-            <div className="flex flex-col gap-3">
+          <motion.div {...fadeUp} transition={{ delay: 0.5 }} className={`${glass} p-4 sm:p-5`}>
+            <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white mb-4 uppercase tracking-[0.2em] opacity-80">Health Precautions</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-3">
               {getHealthAdvice(data.aqi).map((tip, i) => (
                 <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + i * 0.1 }}
-                  className="flex items-start gap-3 p-3 rounded-xl bg-white/40 dark:bg-black/20 border-l-4"
+                  className="flex items-start gap-3 p-4 rounded-xl bg-white/40 dark:bg-black/20 border-l-4 h-full"
                   style={{ borderColor: aqiStyles.color, borderTopWidth: '1px', borderRightWidth: '1px', borderBottomWidth: '1px', borderBottomColor: 'rgba(255,255,255,0.05)', borderTopColor: 'rgba(255,255,255,0.05)', borderRightColor: 'rgba(255,255,255,0.05)' }}>
-                  <div className="text-sm text-slate-700 dark:text-slate-300 font-medium">{tip}</div>
+                  <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-bold leading-relaxed">{tip}</div>
                 </motion.div>
               ))}
             </div>
